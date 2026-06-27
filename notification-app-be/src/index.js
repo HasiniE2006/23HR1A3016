@@ -178,8 +178,8 @@ function normalizeNotification(raw) {
  * Automatically refreshes the Bearer token if it has expired.
  */
 async function fetchFromEvalAPI(req, { page = 1, limit = 5, notification_type } = {}) {
-  // Enforce the API's minimum limit of 5
-  const safeLimit = Math.max(5, limit);
+  // Enforce the API's limit constraints: min=5, max=10
+  const safeLimit = Math.min(10, Math.max(5, limit));
 
   const params = new URLSearchParams({ page, limit: safeLimit });
   if (notification_type && notification_type !== 'All') {
@@ -288,7 +288,7 @@ app.get('/notifications', async (req, res, next) => {
 
     const notification_type = req.query.notification_type || req.query.type || 'All';
     const page  = Math.max(1, parseInt(req.query.page,  10) || 1);
-    const limit = Math.max(5, parseInt(req.query.limit, 10) || 5);
+    const limit = Math.min(10, Math.max(5, parseInt(req.query.limit, 10) || 5));
 
     logEvent('NotificationFetch', `Proxying: type=${notification_type}, page=${page}, limit=${limit}`);
 

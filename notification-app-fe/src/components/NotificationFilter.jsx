@@ -2,13 +2,8 @@ import { ToggleButtonGroup, ToggleButton } from '@mui/material';
 
 const FILTERS = ['All', 'Placement', 'Result', 'Event'];
 
-/**
- * Filter row for selecting notification types, styled with Material UI v9.
- * All sx selectors use MUI v9-compatible class names.
- */
 export function NotificationFilter({ value, onChange }) {
   const handleChange = (_event, newValue) => {
-    // Prevent deselecting the current filter (exclusive mode)
     if (newValue !== null) {
       onChange(newValue);
     }
@@ -22,27 +17,37 @@ export function NotificationFilter({ value, onChange }) {
       aria-label="Filter notifications by type"
       size="small"
       sx={{
-        flexWrap: 'wrap',
-        gap: 1,
-        // In MUI v9 the grouped class selectors changed; target the root directly
+        display: 'flex',
+        flexWrap: 'nowrap',
+        width: '100%',
+        bgcolor: 'rgba(255, 255, 255, 0.02)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        borderRadius: '14px',
+        p: 0.5,
+        gap: 0.5,
         '& .MuiToggleButton-root': {
-          borderRadius: '20px !important',
-          border: '1px solid',
-          borderColor: 'divider',
-          px: 3,
-          py: 0.75,
+          flex: 1,
+          borderRadius: '10px !important',
+          border: 'none',
+          py: 1,
+          px: 2,
+          fontSize: '0.85rem',
+          fontWeight: 600,
           textTransform: 'none',
           color: 'text.secondary',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          whiteSpace: 'nowrap',
           '&.Mui-selected': {
-            bgcolor: 'primary.main',
-            color: 'white',
-            borderColor: 'primary.main',
-            boxShadow: '0 0 12px rgba(108, 142, 245, 0.35)',
-            '&:hover': { bgcolor: 'primary.dark' },
+            bgcolor: 'rgba(99, 102, 241, 0.1)',
+            color: '#818cf8',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+            border: '1px solid rgba(99, 102, 241, 0.2)',
+            '&:hover': {
+              bgcolor: 'rgba(99, 102, 241, 0.15)',
+            },
           },
           '&:hover': {
-            bgcolor: 'action.hover',
-            borderColor: 'primary.main',
+            bgcolor: 'rgba(255, 255, 255, 0.03)',
             color: 'text.primary',
           },
         },
