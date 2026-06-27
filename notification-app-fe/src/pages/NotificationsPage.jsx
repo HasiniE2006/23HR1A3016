@@ -1,13 +1,24 @@
-// notification-app-fe/src/pages/NotificationsPage.jsx
+import {
+  Container,
+  Box,
+  Typography,
+  Badge,
+  Divider,
+  CircularProgress,
+  Alert,
+  Pagination,
+  Stack
+} from '@mui/material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import InboxIcon from '@mui/icons-material/Inbox';
 import { useNotifications } from '../hooks/useNotifications';
 import { NotificationCard } from '../components/NotificationCard';
 import { NotificationFilter } from '../components/NotificationFilter';
 import { PriorityInbox } from '../components/PriorityInbox';
-import './NotificationsPage.css';
 
 /**
- * Main page: lists notifications fetched from the backend.
- * Supports type filtering and pagination.
+ * NotificationsPage component rendered using Material UI components only.
+ * Houses the Priority Inbox, category filters, notification cards list, and pagination.
  */
 export function NotificationsPage() {
   const {
@@ -29,89 +40,78 @@ export function NotificationsPage() {
     setPage(1); // reset to first page on filter change
   };
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = (event, newPage) => {
     setPage(newPage);
   };
 
   return (
-    <main className="notifications-page">
-      <header className="notifications-page__header">
-        <div className="notifications-page__title-row">
-          <span className="notifications-page__icon" aria-hidden="true">🔔</span>
-          <h1 className="notifications-page__title">Notifications</h1>
-          {unreadCount > 0 && (
-            <span className="notifications-page__badge">{unreadCount}</span>
-          )}
-        </div>
-        <p className="notifications-page__subtitle">
-          {total} notification{total !== 1 ? 's' : ''} found
-        </p>
-      </header>
+    <Container maxWidth="sm" sx={{ py: 4 }}>
+      <Box display="flex" alignItems="center" gap={1.5} mb={2.5}>
+        <Badge badgeContent={unreadCount} color="primary" max={99}>
+          <NotificationsIcon sx={{ fontSize: 32, color: 'text.primary' }} />
+        </Badge>
+        <Box>
+          <Typography variant="h5" fontWeight={700} color="text.primary">
+            Notifications
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {total} notification{total !== 1 ? 's' : ''} found
+          </Typography>
+        </Box>
+      </Box>
 
-      <hr className="notifications-page__divider" />
+      <Divider sx={{ mb: 2.5 }} />
 
       <PriorityInbox />
 
-      <NotificationFilter value={filter} onChange={handleFilterChange} />
+      <Box sx={{ mb: 2.5 }}>
+        <NotificationFilter value={filter} onChange={handleFilterChange} />
+      </Box>
 
-      <section className="notifications-page__list" aria-live="polite">
+      <Box role="region" aria-live="polite" sx={{ minHeight: 200, display: 'flex', flexDirection: 'column' }}>
         {loading && (
-          <div className="notifications-page__spinner" role="status" aria-label="Loading">
-            <div className="spinner" />
-            <p>Loading notifications…</p>
-          </div>
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={6} gap={2}>
+            <CircularProgress />
+            <Typography variant="body2" color="text.secondary">
+              Loading notifications…
+            </Typography>
+          </Box>
         )}
 
         {!loading && error && (
-          <div className="notifications-page__error" role="alert">
-            <span>⚠️</span> Failed to load notifications: {error}
-          </div>
+          <Alert severity="error" sx={{ borderRadius: 2 }}>
+            Failed to load notifications: {error}
+          </Alert>
         )}
 
         {!loading && !error && notifications.length === 0 && (
-          <div className="notifications-page__empty">
-            <span>📭</span>
-            <p>No notifications found.</p>
-          </div>
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={6} gap={1} color="text.secondary">
+            <InboxIcon sx={{ fontSize: 48, opacity: 0.5 }} />
+            <Typography variant="body2">No notifications found.</Typography>
+          </Box>
         )}
 
-        {!loading && !error && notifications.map((n) => (
-          <NotificationCard key={n.id} notification={n} />
-        ))}
-      </section>
+        {!loading && !error && (
+          <Stack spacing={1.5}>
+            {notifications.map((n) => (
+              <NotificationCard key={n.id} notification={n} />
+            ))}
+          </Stack>
+        )}
+      </Box>
 
       {!loading && totalPages > 1 && (
-        <nav className="pagination" aria-label="Notification pages">
-          <button
-            className="pagination__btn"
-            onClick={() => handlePageChange(page - 1)}
-            disabled={page <= 1}
-            aria-label="Previous page"
-          >
-            ← Prev
-          </button>
-
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <button
-              key={p}
-              className={`pagination__btn ${p === page ? 'pagination__btn--active' : ''}`}
-              onClick={() => handlePageChange(p)}
-              aria-current={p === page ? 'page' : undefined}
-            >
-              {p}
-            </button>
-          ))}
-
-          <button
-            className="pagination__btn"
-            onClick={() => handlePageChange(page + 1)}
-            disabled={page >= totalPages}
-            aria-label="Next page"
-          >
-            Next →
-          </button>
-        </nav>
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            shape="rounded"
+            size="medium"
+          />
+        </Box>
       )}
-    </main>
+    </Container>
   );
 }
