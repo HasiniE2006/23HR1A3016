@@ -26,9 +26,19 @@ function requestLogger(req, res, next) {
 function errorLogger(err, req, res, next) {
   const timestamp = new Date().toISOString();
   console.error(
-    `[${timestamp}] ERROR ${req.method} ${req.originalUrl} – ${err.message}`
+    `[${timestamp}] [ApiError] ERROR ${req.method} ${req.originalUrl} – ${err.message}`
   );
   next(err);
 }
 
-module.exports = { requestLogger, errorLogger };
+/**
+ * logEvent – general utility to log structured system events.
+ * Format: [TIMESTAMP] [TAG] MESSAGE
+ */
+function logEvent(tag, message) {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] [${tag}] ${message}`);
+}
+
+module.exports = { requestLogger, errorLogger, logEvent };
+

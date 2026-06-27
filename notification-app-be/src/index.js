@@ -1,7 +1,7 @@
 // notification-app-be/src/index.js
 const express = require('express');
 const cors = require('cors');
-const { requestLogger, errorLogger } = require('../../logging-middleware');
+const { requestLogger, errorLogger, logEvent } = require('../../logging-middleware');
 const { calculatePriority, sortByPriority, getTopPriorityUnread } = require('./priorityCalculator');
 
 const app = express();
@@ -46,14 +46,17 @@ TYPES.forEach((type) => {
     const date = new Date();
     date.setDate(date.getDate() - daysAgo);
 
-    notifications.push({
+    const notification = {
       id: id++,
       type,
       title: tpl.title,
       message: tpl.message,
       isRead: idx > 1, // first two per type are "unread"
       createdAt: date.toISOString(),
-    });
+    };
+
+    logEvent('IncomingNotificationProcessing', `Processing seed notification template: id=${notification.id}, type=${type}, title="${tpl.title}"`);
+    notifications.push(notification);
   });
 });
 
@@ -81,30 +84,39 @@ app.get('/health', (req, res) => {
  *
  * Results are always delivered in priority order (type weight + recency).
  */
-app.get('/notifications', (req, res) => {
-  const { type, page = '1', limit = '5' } = req.query;
+app.get('/notifications', (req, res, next) => {
+  try {
+    logEvent('IncomingNotificationProcessing', `Processing incoming request: GET ${req.originalUrl}`);
+    const { type, page = '1', limit = '5' } = req.query;
+    logEvent('NotificationFetch', `Fetching notifications with params: type=${type || 'All'}, page=${page}, limit=${limit}`);
 
-  let filtered = notifications;
-  if (type && type !== 'All') {
-    filtered = notifications.filter((n) => n.type === type);
+    let filtered = notifications;
+    if (type && type !== 'All') {
+      filtered = notifications.filter((n) => n.type === type);
+    }
+
+    // Always deliver results in priority order
+    const prioritySorted = sortByPriority(filtered);
+
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.max(1, parseInt(limit, 10));
+    const totalCount = prioritySorted.length;
+    const totalPages = Math.ceil(totalCount / limitNum);
+    const start = (pageNum - 1) * limitNum;
+    const items = prioritySorted.slice(start, start + limitNum);
+
+    logEvent('NotificationFetch', `Successfully fetched ${items.length} notifications out of ${totalCount} total`);
+
+    res.json({
+      notifications: items,
+      total: totalCount,
+      page: pageNum,
+      totalPages,
+    });
+  } catch (err) {
+    logEvent('ApiError', `Error inside GET /notifications: ${err.message}`);
+    next(err);
   }
-
-  // Always deliver results in priority order
-  const prioritySorted = sortByPriority(filtered);
-
-  const pageNum = Math.max(1, parseInt(page, 10));
-  const limitNum = Math.max(1, parseInt(limit, 10));
-  const totalCount = prioritySorted.length;
-  const totalPages = Math.ceil(totalCount / limitNum);
-  const start = (pageNum - 1) * limitNum;
-  const items = prioritySorted.slice(start, start + limitNum);
-
-  res.json({
-    notifications: items,
-    total: totalCount,
-    page: pageNum,
-    totalPages,
-  });
 });
 
 /**
@@ -113,15 +125,29 @@ app.get('/notifications', (req, res) => {
  * Each item includes a priorityScore field.
  * Logging: requestLogger covers HTTP level; priorityCalculator logs calculation summary.
  */
-app.get('/notifications/priority-inbox', (req, res) => {
-  const top = getTopPriorityUnread(notifications, 10);
-  res.json({ notifications: top, total: top.length });
+app.get('/notifications/priority-inbox', (req, res, next) => {
+  try {
+    logEvent('IncomingNotificationProcessing', `Processing incoming request: GET ${req.originalUrl}`);
+    logEvent('NotificationFetch', `Fetching top 10 highest-priority unread notifications`);
+    const top = getTopPriorityUnread(notifications, 10);
+    logEvent('NotificationFetch', `Successfully fetched priority inbox with ${top.length} items`);
+    res.json({ notifications: top, total: top.length });
+  } catch (err) {
+    logEvent('ApiError', `Error inside GET /notifications/priority-inbox: ${err.message}`);
+    next(err);
+  }
 });
 
 // Client-side log receiver
-app.post('/client-log', (req, res) => {
-  console.info('[ClientLog]', req.body || {});
-  res.status(204).end();
+app.post('/client-log', (req, res, next) => {
+  try {
+    logEvent('IncomingNotificationProcessing', `Processing incoming client log request`);
+    console.info('[ClientLog]', req.body || {});
+    res.status(204).end();
+  } catch (err) {
+    logEvent('ApiError', `Error inside POST /client-log: ${err.message}`);
+    next(err);
+  }
 });
 
 // ── Error handling ─────────────────────────────────────────────────────────
