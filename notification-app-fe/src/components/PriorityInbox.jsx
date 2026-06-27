@@ -50,7 +50,19 @@ export function PriorityInbox() {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" py={2.5} bgcolor="background.paper" borderRadius={2} border="1px solid" borderColor="divider" mb={2.5}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          py: 2.5,
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: 'divider',
+          mb: 2.5,
+        }}
+      >
         <CircularProgress size={20} sx={{ mr: 1.5 }} />
         <Typography variant="body2" color="text.secondary">Loading Priority Inbox...</Typography>
       </Box>
@@ -81,7 +93,7 @@ export function PriorityInbox() {
           '&:hover': { bgcolor: 'action.hover' },
         }}
       >
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <BoltIcon sx={{ color: '#f59e0b', verticalAlign: 'middle' }} />
           <Typography variant="body2" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             Priority Inbox

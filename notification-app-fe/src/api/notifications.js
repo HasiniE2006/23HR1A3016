@@ -25,6 +25,15 @@ export async function logClientEvent(tag, message) {
 }
 
 /**
+ * Helper to fetch any stored authentication token from localStorage
+ * and construct appropriate headers.
+ */
+function getAuthHeaders() {
+  const token = localStorage.getItem('auth_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+/**
  * Fetch paginated notifications from the backend proxy.
  * The backend forwards the request to the official evaluation API with the
  * stored auth token, sorts results by priority, and returns them here.
@@ -46,7 +55,11 @@ export async function fetchNotifications({ type = 'All', page = 1, limit = 5 } =
   if (type && type !== 'All') params.set('notification_type', type);
 
   try {
-    const res = await fetch(`${BASE_URL}/notifications?${params.toString()}`);
+    const res = await fetch(`${BASE_URL}/notifications?${params.toString()}`, {
+      headers: {
+        ...getAuthHeaders()
+      }
+    });
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -76,7 +89,11 @@ export async function fetchNotifications({ type = 'All', page = 1, limit = 5 } =
 export async function fetchPriorityInbox() {
   await logClientEvent('FrontendApiCall', 'fetchPriorityInbox initiated');
   try {
-    const res = await fetch(`${BASE_URL}/notifications/priority-inbox`);
+    const res = await fetch(`${BASE_URL}/notifications/priority-inbox`, {
+      headers: {
+        ...getAuthHeaders()
+      }
+    });
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));

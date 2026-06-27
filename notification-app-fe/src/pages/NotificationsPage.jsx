@@ -7,20 +7,23 @@ import {
   CircularProgress,
   Alert,
   Pagination,
-  Stack
+  Stack,
+  Tooltip,
+  IconButton,
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import InboxIcon from '@mui/icons-material/Inbox';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import { useNotifications } from '../hooks/useNotifications';
 import { NotificationCard } from '../components/NotificationCard';
 import { NotificationFilter } from '../components/NotificationFilter';
 import { PriorityInbox } from '../components/PriorityInbox';
 
 /**
- * NotificationsPage component rendered using Material UI components only.
- * Houses the Priority Inbox, category filters, notification cards list, and pagination.
+ * NotificationsPage — all layout props moved inside sx={{}} for MUI v9 compat.
+ * onClearToken: called when user wants to change their API token.
  */
-export function NotificationsPage() {
+export function NotificationsPage({ onClearToken }) {
   const {
     notifications,
     total,
@@ -37,20 +40,22 @@ export function NotificationsPage() {
 
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
-    setPage(1); // reset to first page on filter change
+    setPage(1);
   };
 
-  const handlePageChange = (event, newPage) => {
+  const handlePageChange = (_event, newPage) => {
     setPage(newPage);
   };
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
-      <Box display="flex" alignItems="center" gap={1.5} mb={2.5}>
+
+      {/* ── Header ── */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
         <Badge badgeContent={unreadCount} color="primary" max={99}>
           <NotificationsIcon sx={{ fontSize: 32, color: 'text.primary' }} />
         </Badge>
-        <Box>
+        <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h5" fontWeight={700} color="text.primary">
             Notifications
           </Typography>
@@ -58,19 +63,48 @@ export function NotificationsPage() {
             {total} notification{total !== 1 ? 's' : ''} found
           </Typography>
         </Box>
+        {onClearToken && (
+          <Tooltip title="Change API Token">
+            <IconButton
+              id="change-token-btn"
+              size="small"
+              onClick={onClearToken}
+              sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
+              aria-label="Change API token"
+            >
+              <VpnKeyIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
 
       <Divider sx={{ mb: 2.5 }} />
 
+      {/* ── Priority Inbox ── */}
       <PriorityInbox />
 
+      {/* ── Filter bar ── */}
       <Box sx={{ mb: 2.5 }}>
         <NotificationFilter value={filter} onChange={handleFilterChange} />
       </Box>
 
-      <Box role="region" aria-live="polite" sx={{ minHeight: 200, display: 'flex', flexDirection: 'column' }}>
+      {/* ── Notification list ── */}
+      <Box
+        role="region"
+        aria-live="polite"
+        sx={{ minHeight: 200, display: 'flex', flexDirection: 'column' }}
+      >
         {loading && (
-          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={6} gap={2}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 6,
+              gap: 2,
+            }}
+          >
             <CircularProgress />
             <Typography variant="body2" color="text.secondary">
               Loading notifications…
@@ -85,7 +119,17 @@ export function NotificationsPage() {
         )}
 
         {!loading && !error && notifications.length === 0 && (
-          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={6} gap={1} color="text.secondary">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 6,
+              gap: 1,
+              color: 'text.secondary',
+            }}
+          >
             <InboxIcon sx={{ fontSize: 48, opacity: 0.5 }} />
             <Typography variant="body2">No notifications found.</Typography>
           </Box>
@@ -100,8 +144,9 @@ export function NotificationsPage() {
         )}
       </Box>
 
+      {/* ── Pagination ── */}
       {!loading && totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={4}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Pagination
             count={totalPages}
             page={page}

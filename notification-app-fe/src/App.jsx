@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { TokenSetup } from './components/TokenSetup';
 
 const darkTheme = createTheme({
   palette: {
@@ -33,10 +35,24 @@ const darkTheme = createTheme({
 });
 
 export default function App() {
+  // Check whether a token is already saved in localStorage
+  const [hasToken, setHasToken] = useState(() =>
+    Boolean(localStorage.getItem('auth_token'))
+  );
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <NotificationsPage />
+      {hasToken ? (
+        <NotificationsPage
+          onClearToken={() => {
+            localStorage.removeItem('auth_token');
+            setHasToken(false);
+          }}
+        />
+      ) : (
+        <TokenSetup onTokenSaved={() => setHasToken(true)} />
+      )}
     </ThemeProvider>
   );
 }
