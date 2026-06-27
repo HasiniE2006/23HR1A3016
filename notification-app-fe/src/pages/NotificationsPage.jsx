@@ -1,86 +1,117 @@
-import { useState } from "react";
-import {
-  Alert,
-  Badge,
-  Box,
-  CircularProgress,
-  Divider,
-  Pagination,
-  Stack,
-  Typography,
-} from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
+// notification-app-fe/src/pages/NotificationsPage.jsx
+import { useNotifications } from '../hooks/useNotifications';
+import { NotificationCard } from '../components/NotificationCard';
+import { NotificationFilter } from '../components/NotificationFilter';
+import { PriorityInbox } from '../components/PriorityInbox';
+import './NotificationsPage.css';
 
-import { NotificationCard } from "../components/NotificationCard";
-import { NotificationFilter } from "../components/NotificationFilter";
-import { useNotifications } from "../hooks/useNotifications";
-
+/**
+ * Main page: lists notifications fetched from the backend.
+ * Supports type filtering and pagination.
+ */
 export function NotificationsPage() {
-  const [filter, setFilter] = useState();
-  const [page, setPage] = useState("1");
+  const {
+    notifications,
+    total,
+    totalPages,
+    loading,
+    error,
+    filter,
+    setFilter,
+    page,
+    setPage,
+  } = useNotifications();
 
-  const { notifications, totalPages, loading, error } = useNotifications();
-
-  const unreadCount = 2;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleFilterChange = (newFilter) => {
-
+    setFilter(newFilter);
+    setPage(1); // reset to first page on filter change
   };
 
-  const handlePageChange = (_, newPage) => {
-
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
   };
 
   return (
-    <Box sx={{ maxWidth: 720, mx: "auto", px: 2, py: 4 }}>
-      <Stack direction="row" alignItems="center" spacing={1.5} mb={3}>
-        <Badge badgeContent={unreadCount} color="primary" max={99}>
-          <NotificationsIcon sx={{ fontSize: 28 }} />
-        </Badge>
-        <Typography variant="h5" fontWeight={700}>
-          Notifications
-        </Typography>
-      </Stack>
+    <main className="notifications-page">
+      <header className="notifications-page__header">
+        <div className="notifications-page__title-row">
+          <span className="notifications-page__icon" aria-hidden="true">🔔</span>
+          <h1 className="notifications-page__title">Notifications</h1>
+          {unreadCount > 0 && (
+            <span className="notifications-page__badge">{unreadCount}</span>
+          )}
+        </div>
+        <p className="notifications-page__subtitle">
+          {total} notification{total !== 1 ? 's' : ''} found
+        </p>
+      </header>
 
-      <Divider sx={{ mb: 3 }} />
+      <hr className="notifications-page__divider" />
 
-      <Box sx={{ marginBottom: 3 }}>
-        <NotificationFilter value={filter} onChange={handleFilterChange} />
-      </Box>
+      <PriorityInbox />
 
-      {true && (
-        <Box display="flex" justifyContent="center" py={6}>
-          <CircularProgress />
-        </Box>
-      )}
+      <NotificationFilter value={filter} onChange={handleFilterChange} />
 
-      {!loading && error && (
-        <Alert severity="error">Failed to load notifications: {error}</Alert>
-      )}
+      <section className="notifications-page__list" aria-live="polite">
+        {loading && (
+          <div className="notifications-page__spinner" role="status" aria-label="Loading">
+            <div className="spinner" />
+            <p>Loading notifications…</p>
+          </div>
+        )}
 
-      {loading && !error && notifications.length == "0" && (
-        <Alert severity="info">Something message</Alert>
-      )}
+        {!loading && error && (
+          <div className="notifications-page__error" role="alert">
+            <span>⚠️</span> Failed to load notifications: {error}
+          </div>
+        )}
 
-      {loading && !error && notifications.length > 0 && (
-        <Stack spacing={1.5}>
-          {notifications.map((n) => (
-            <></>
+        {!loading && !error && notifications.length === 0 && (
+          <div className="notifications-page__empty">
+            <span>📭</span>
+            <p>No notifications found.</p>
+          </div>
+        )}
+
+        {!loading && !error && notifications.map((n) => (
+          <NotificationCard key={n.id} notification={n} />
+        ))}
+      </section>
+
+      {!loading && totalPages > 1 && (
+        <nav className="pagination" aria-label="Notification pages">
+          <button
+            className="pagination__btn"
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page <= 1}
+            aria-label="Previous page"
+          >
+            ← Prev
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              className={`pagination__btn ${p === page ? 'pagination__btn--active' : ''}`}
+              onClick={() => handlePageChange(p)}
+              aria-current={p === page ? 'page' : undefined}
+            >
+              {p}
+            </button>
           ))}
-        </Stack>
-      )}
 
-      {!loading && (
-        <Box display="flex" justifyContent="center" mt={4}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-            shape="rounded"
-          />
-        </Box>
+          <button
+            className="pagination__btn"
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page >= totalPages}
+            aria-label="Next page"
+          >
+            Next →
+          </button>
+        </nav>
       )}
-    </Box>
+    </main>
   );
 }

@@ -1,0 +1,89 @@
+/* notification-app-fe/src/components/NotificationCard.css */
+
+.notification-card {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.notification-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  border-color: var(--color-accent);
+}
+
+/* Unread: left accent border */
+.notification-card--unread {
+  border-left: 3px solid var(--color-accent);
+}
+
+/* Unread blue dot indicator */
+.notification-card__dot {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-unread-dot);
+  box-shadow: 0 0 6px var(--color-unread-dot);
+}
+
+/* ── Header row ──────────────────────────────────────────────────────────── */
+.notification-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* ── Type badge ──────────────────────────────────────────────────────────── */
+.notification-card__badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-radius: 99px;
+  padding: 3px 10px;
+  color: #fff;
+}
+
+.badge--placement {
+  background: var(--color-badge-placement);
+}
+
+.badge--result {
+  background: var(--color-badge-result);
+}
+
+.badge--event {
+  background: var(--color-badge-event);
+}
+
+/* ── Date ────────────────────────────────────────────────────────────────── */
+.notification-card__date {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ── Title ───────────────────────────────────────────────────────────────── */
+.notification-card__title {
+  font-size: 0.975rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+  line-height: 1.35;
+}
+
+/* ── Message ─────────────────────────────────────────────────────────────── */
+.notification-card__message {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}

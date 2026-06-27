@@ -1,0 +1,70 @@
+/* notification-app-fe/src/index.css */
+/* ── Global Reset & Tokens ─────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Colors */
+  --color-bg:          #0f1117;
+  --color-surface:     #1a1d27;
+  --color-surface-2:   #22263a;
+  --color-border:      #2e3352;
+  --color-text:        #e8eaf0;
+  --color-text-muted:  #7b82a0;
+  --color-accent:      #6c8ef5;
+  --color-accent-dark: #4a6be8;
+  --color-unread-dot:  #6c8ef5;
+  --color-error:       #f05b5b;
+  --color-success:     #4caf50;
+
+  /* Badge colors per type */
+  --color-badge-placement: #2a9d8f;
+  --color-badge-result:    #e76f51;
+  --color-badge-event:     #8b5cf6;
+
+  /* Spacing */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  40px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Fonts */
+  --font-family: 'Inter', sans-serif;
+}
+
+html, body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
